@@ -307,6 +307,7 @@ class StoreManager:
                     else:
                         sub.text = str(v)
         tree = ET.ElementTree(root)
+        ET.indent(tree, space="  ", level=0)
         tree.write(filename, encoding="utf-8", xml_declaration=True)
 
 
@@ -497,3 +498,6 @@ if __name__ == "__main__":
         store.find_product(99)
     except ProductNotFoundError as e:
         print("Ошибка:", e)
+
+    store.find_product(99)
+    
