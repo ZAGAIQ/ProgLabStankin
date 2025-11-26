@@ -1,0 +1,98 @@
+{
+    "products": [
+        {
+            "id": 1,
+            "name": "Ноутбук Lenovo",
+            "category": "Ноутбуки",
+            "price": 85000.0,
+            "stock": 4
+        },
+        {
+            "id": 2,
+            "name": "Смартфон Samsung",
+            "category": "Телефоны",
+            "price": 55000.0,
+            "stock": 8
+        },
+        {
+            "id": 3,
+            "name": "Наушники Sony",
+            "category": "Аксессуары",
+            "price": 11000.0,
+            "stock": 20
+        }
+    ],
+    "customers": [
+        {
+            "id": 1,
+            "name": "Тимофей Мальцев",
+            "email": "fala@gmail.com",
+            "address": "Москва, ул. Ташкентская 32/156"
+        },
+        {
+            "id": 2,
+            "name": "Олег Мандриков",
+            "email": "penza777@mail.ru",
+            "address": "Пенза, ул. Пушкина"
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "name": "Ноутбуки",
+            "description": ""
+        },
+        {
+            "id": 2,
+            "name": "Телефоны",
+            "description": ""
+        },
+        {
+            "id": 3,
+            "name": "Аксессуары",
+            "description": ""
+        }
+    ],
+    "orders": [
+        {
+            "id": 1,
+            "customer_id": 1,
+            "items": [
+                {
+                    "product_id": 1,
+                    "quantity": 1
+                },
+                {
+                    "product_id": 2,
+                    "quantity": 2
+                }
+            ],
+            "status": "Создан",
+            "total": 195000.0
+        }
+    ],
+    "payments": [
+        {
+            "order_id": 1,
+            "amount": 195000.0,
+            "method": "Карта",
+            "status": "Оплачено"
+        }
+    ],
+    "deliveries": [
+        {
+            "order_id": 1,
+            "address": "Москва, ул. Ташкентская 32/156",
+            "status": "Отправлено"
+        }
+    ],
+    "reviews": [
+        {
+            "id": 1,
+            "product_id": 1,
+            "customer_id": 1,
+            "rating": 5,
+            "comment": "Отличный ноутбук!"
+        }
+    ]
+}

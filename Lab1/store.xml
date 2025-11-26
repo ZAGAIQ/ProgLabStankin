@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8'?>
+<store>
+  <products>
+    <product>
+      <id>1</id>
+      <name>Ноутбук Lenovo</name>
+      <category>Ноутбуки</category>
+      <price>85000.0</price>
+      <stock>4</stock>
+    </product>
+    <product>
+      <id>2</id>
+      <name>Смартфон Samsung</name>
+      <category>Телефоны</category>
+      <price>55000.0</price>
+      <stock>8</stock>
+    </product>
+    <product>
+      <id>3</id>
+      <name>Наушники Sony</name>
+      <category>Аксессуары</category>
+      <price>11000.0</price>
+      <stock>20</stock>
+    </product>
+  </products>
+  <customers>
+    <customer>
+      <id>1</id>
+      <name>Тимофей Мальцев</name>
+      <email>fala@gmail.com</email>
+      <address>Москва, ул. Ташкентская 32/156</address>
+    </customer>
+    <customer>
+      <id>2</id>
+      <name>Олег Мандриков</name>
+      <email>penza777@mail.ru</email>
+      <address>Пенза, ул. Пушкина</address>
+    </customer>
+  </customers>
+  <categories>
+    <categorie>
+      <id>1</id>
+      <name>Ноутбуки</name>
+      <description />
+    </categorie>
+    <categorie>
+      <id>2</id>
+      <name>Телефоны</name>
+      <description />
+    </categorie>
+    <categorie>
+      <id>3</id>
+      <name>Аксессуары</name>
+      <description />
+    </categorie>
+  </categories>
+  <orders>
+    <order>
+      <id>1</id>
+      <customer_id>1</customer_id>
+      <items>[{"product_id": 1, "quantity": 1}, {"product_id": 2, "quantity": 2}]</items>
+      <status>Создан</status>
+      <total>195000.0</total>
+    </order>
+  </orders>
+  <payments>
+    <payment>
+      <order_id>1</order_id>
+      <amount>195000.0</amount>
+      <method>Карта</method>
+      <status>Оплачено</status>
+    </payment>
+  </payments>
+  <deliveries>
+    <deliverie>
+      <order_id>1</order_id>
+      <address>Москва, ул. Ташкентская 32/156</address>
+      <status>Отправлено</status>
+    </deliverie>
+  </deliveries>
+  <reviews>
+    <review>
+      <id>1</id>
+      <product_id>1</product_id>
+      <customer_id>1</customer_id>
+      <rating>5</rating>
+      <comment>Отличный ноутбук!</comment>
+    </review>
+  </reviews>
+</store>
