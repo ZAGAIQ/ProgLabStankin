@@ -1,7 +1,6 @@
 """Обработчики сообщений Telegram-бота."""
 import logging
 from datetime import datetime
-from typing import Optional
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -220,14 +219,14 @@ class MessageHandler:
     ) -> None:
         """Обрабатывает создание события."""
         slots = llm_response.slots
-        
+
         if not slots.title or not slots.start:
             await update.message.reply_text(
                 "Для создания события необходимо указать название и время начала. "
                 "Пожалуйста, уточните эти данные."
             )
             return
-        
+
         # Создаем событие
         event = self.calendar_client.create_event(
             title=slots.title,
@@ -237,14 +236,21 @@ class MessageHandler:
             location=slots.location,
             participants=slots.participants
         )
-        
+
         if event:
             start_time = self._format_datetime_for_user(slots.start)
             message = (
                 f"✅ Событие создано!\n\n"
                 f"📅 {slots.title}\n"
-                f"🕐 {start_time}\n"
+                f"🕐 {start_time}"
             )
+            # Добавляем время окончания, если есть
+            if slots.end:
+                end_time = self._format_datetime_for_user(slots.end)
+                message += f" — {end_time}\n"
+            else:
+                message += "\n"
+
             if slots.location:
                 message += f"📍 {slots.location}\n"
             if slots.participants:
@@ -252,7 +258,7 @@ class MessageHandler:
             message += f"\nID события: {event['id']}"
             if event.get('htmlLink'):
                 message += f"\n🔗 {event['htmlLink']}"
-            
+
             await update.message.reply_text(message)
         else:
             await update.message.reply_text(
@@ -267,7 +273,7 @@ class MessageHandler:
     ) -> None:
         """Обрабатывает просмотр событий."""
         slots = llm_response.slots
-        
+
         # Определяем дату для просмотра
         target_date = None
         if slots.date:
@@ -279,43 +285,72 @@ class MessageHandler:
                 target_date = dt.strftime("%Y-%m-%d")
             except:
                 pass
-        
+
         if not target_date:
             await update.message.reply_text(
                 "Пожалуйста, укажите дату для просмотра событий. "
                 "Например: 'покажи события на 27 ноября' или '/view 2025-11-27'"
             )
             return
-        
+
         # Получаем события
         events = self.calendar_client.list_events(target_date)
-        
+
         if not events:
             await update.message.reply_text(
                 f"📅 На {self._format_date_for_user(target_date)} нет запланированных событий."
             )
             return
-        
+
         # Формируем сообщение со списком событий
         message = f"📅 События на {self._format_date_for_user(target_date)}:\n\n"
-        
+
         for i, event in enumerate(events, 1):
             summary = event.get('summary', 'Без названия')
             start = event.get('start', {})
-            start_time = start.get('dateTime', start.get('date', ''))
-            
-            if start_time:
+            end = event.get('end', {})
+
+            # Вытащим строки (могут быть либо dateTime, либо date для all-day)
+            start_raw = start.get('dateTime') or start.get('date') or ''
+            end_raw = end.get('dateTime') or end.get('date') or ''
+
+            # Форматируем для пользователя
+            if start.get('dateTime'):
                 try:
-                    dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
-                    time_str = dt.strftime("%H:%M")
+                    dt_start = datetime.fromisoformat(start_raw.replace("Z", "+00:00"))
+                    start_str = dt_start.strftime("%H:%M")
                 except:
-                    time_str = start_time
+                    start_str = start_raw
+                if end.get('dateTime'):
+                    try:
+                        dt_end = datetime.fromisoformat(end_raw.replace("Z", "+00:00"))
+                        end_str = dt_end.strftime("%H:%M")
+                    except:
+                        end_str = end_raw
+                    time_display = f"{start_str} — {end_str}"
+                else:
+                    time_display = start_str
             else:
-                time_str = "?"
-            
+                # all-day event (date)
+                try:
+                    dt_start = datetime.strptime(start_raw, "%Y-%m-%d")
+                    start_str = dt_start.strftime("%d.%m.%Y")
+                except:
+                    start_str = start_raw
+                if end_raw:
+                    try:
+                        dt_end = datetime.strptime(end_raw, "%Y-%m-%d")
+                        # Обычно end в Google Calendar — день после последнего дня включительно, оставим как есть
+                        end_str = dt_end.strftime("%d.%m.%Y")
+                        time_display = f"{start_str} — {end_str} (весь день)"
+                    except:
+                        time_display = f"{start_str} — {end_raw} (весь день)"
+                else:
+                    time_display = f"{start_str} (весь день)"
+
             event_id = event.get('id', '')
-            message += f"{i}. 🕐 {time_str} - {summary}\n   ID: {event_id[:8]}...\n\n"
-        
+            message += f"{i}. 🕐 {time_display} — {summary}\n   ID: {event_id[:8]}...\n\n"
+
         await update.message.reply_text(message)
     
     async def _handle_delete(
@@ -382,12 +417,26 @@ class MessageHandler:
                 f"Найдено событие:\n\n"
                 f"📅 {summary}\n"
             )
+
+            # Получаем и форматируем время начала и окончания
+            end = event.get('end', {})
+            end_time = end.get('dateTime', end.get('date', ''))
+
             if start_time:
                 try:
-                    dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
-                    message += f"🕐 {dt.strftime('%Y-%m-%d %H:%M')}\n"
+                    dt_start = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+                    start_fmt = dt_start.strftime('%Y-%m-%d %H:%M')
                 except:
-                    message += f"🕐 {start_time}\n"
+                    start_fmt = start_time
+                if end_time:
+                    try:
+                        dt_end = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
+                        end_fmt = dt_end.strftime('%Y-%m-%d %H:%M')
+                    except:
+                        end_fmt = end_time
+                    message += f"🕐 {start_fmt} — {end_fmt}\n"
+                else:
+                    message += f"🕐 {start_fmt}\n"
             
             message += "\nУдалить это событие? (Да / Нет)"
             
